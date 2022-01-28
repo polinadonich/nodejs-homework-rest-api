@@ -1,6 +1,6 @@
 const dotenv = require("dotenv");
-dotenv.config();
-// require("dotenv").config();
+dotenv.config({ path: "DB_HOST"});
+// require("dotenv").config({ path: "DB_HOST"});
 
 const express = require("express");
 const logger = require("morgan");
