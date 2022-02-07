@@ -7,9 +7,9 @@ const rateLimit = require("express-rate-limit");
 const { HttpCode } = require("./helpers/constants");
 const usersRouter = require("./routes/api/users");
 
-const app = express()
+const contactsRouter = require("./routes/api/contacts");
 
-const formatsLogger = app.get('env') === 'development' ? 'dev' : 'short'
+const app = express();
 
 app.use(helmet());
 app.use(logger(formatsLogger))
