@@ -1,30 +1,47 @@
-const dotenv = require("dotenv");
-dotenv.config({ path: "DB_HOST"});
-// require("dotenv").config({ path: "DB_HOST"});
-
-const express = require("express");
-const logger = require("morgan");
-const cors = require("cors");
+const express = require('express')
+const logger = require('morgan')
+const cors = require('cors')
+const contactsRouter = require('./routes/api/contacts')
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+const { HttpCode } = require("./helpers/constants");
+const usersRouter = require("./routes/api/users");
 
 const contactsRouter = require("./routes/api/contacts");
 
 const app = express();
 
-const formatsLogger = app.get("env") === "development" ? "dev" : "short";
+app.use(helmet());
+app.use(logger(formatsLogger))
+app.use(cors())
+app.use(express.json())
 
-app.use(logger(formatsLogger));
-app.use(cors());
-app.use(express.json());
-
-app.use("/api/contacts", contactsRouter);
-
-app.use((req, res) => {
-  res.status(404).json({ message: "Not found" });
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100,
+  handler: (req, res, next) => {
+    return res.status(HttpCode.BAD_REQUEST).json({
+      status: "error",
+      code: HttpCode.BAD_REQUEST,
+      data: "Bad request",
+      message: "Too many requests, please try again later.",
+    });
+  },
 });
 
-app.use((err, req, res, next) => {
-  const { status = 500, message = "Server error" } = err;
-  res.status(status).json({ message });
+// only apply to requests that begin with /api/
+app.use("/api/", apiLimiter);
+app.use("/api/users", usersRouter);
+app.use("/api/contacts", contactsRouter);
+
+app.use((_req, res) => {
+  res.status(HttpCode.NOT_FOUND).json({ message: "Not found" });
+});
+
+app.use((err, _req, res, _next) => {
+  res
+    .status(err.status || HttpCode.INTERNAL_SERVER_ERROR)
+    .json({ message: err.message });
 });
 
 module.exports = app;

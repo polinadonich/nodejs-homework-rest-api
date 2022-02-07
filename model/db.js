@@ -1,8 +1,4 @@
 const mongoose = require("mongoose");
-// const DB_HOST = "mongodb+srv://Polina:mDA-z3d-qn2-gP9@cluster0.idntd.mongodb.net/db-contacts?retryWrites=true&w=majority"
-// mongoose.connect(DB_HOST)
-//   .then(() => console.log("Database connect"))
-//   .catch(error => console.log(error.message) )
 require("dotenv").config();
 const uriDb = process.env.DB_HOST;
 
